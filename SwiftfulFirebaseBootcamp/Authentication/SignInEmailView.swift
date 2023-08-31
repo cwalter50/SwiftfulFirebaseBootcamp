@@ -12,21 +12,23 @@ final class SignInEmailViewModel: ObservableObject {
     @Published var email = ""
     @Published var password = ""
     
-    func signin() {
+    func signin() async throws{
         guard !email.isEmpty, !password.isEmpty else {
             print("No email or password found")
             return
         }
-        
-        Task {
-            do {
-                let returnedUserData = try await AuthenticationManager.shared.createUser(email: email, password: password)
-                print("success")
-                print(returnedUserData)
-            }catch {
-                print("Error: \(error)")
-            }
-        }
+        let returnedUserData = try await AuthenticationManager.shared.createUser(email: email, password: password)
+        print(returnedUserData)
+        // Task is no longer needed if we use async. do catch is not longer needed if we add throws.
+//        Task {
+//            do {
+//                let returnedUserData = try await AuthenticationManager.shared.createUser(email: email, password: password)
+//                print("success")
+//                print(returnedUserData)
+//            }catch {
+//                print("Error: \(error)")
+//            }
+//        }
 
     }
     
@@ -35,7 +37,7 @@ final class SignInEmailViewModel: ObservableObject {
 struct SignInEmailView: View {
     
     @StateObject private var viewModel = SignInEmailViewModel()
-    
+    @Binding var showSignInView: Bool
     var body: some View {
         VStack {
             TextField("Email...", text: $viewModel.email)
@@ -47,7 +49,14 @@ struct SignInEmailView: View {
                 .background(Color.gray.opacity(0.4))
                 .cornerRadius(10)
             Button {
-                viewModel.signin()
+                Task {
+                    do {
+                        try await viewModel.signin()
+                        showSignInView = false
+                    } catch {
+                        print("Error: \(error)")
+                    }
+                }
             } label: {
                 Text("Sign in")
                     .font(.headline)
@@ -67,7 +76,7 @@ struct SignInEmailView: View {
 struct SignInEmailView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
-            SignInEmailView()
+            SignInEmailView(showSignInView: .constant(false))
         }
         
     }

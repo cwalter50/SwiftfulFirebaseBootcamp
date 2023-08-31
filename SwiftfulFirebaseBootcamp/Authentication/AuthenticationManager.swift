@@ -33,6 +33,10 @@ final class AuthenticationManager {
         return AuthDataResultModel(user: authDataResult.user)
     }
     
+//    func signInUser(email: String, password: String) async throws -> AuthDataResultModel {
+//        
+//    }
+    
     
     // this does not need async because it checks for the user locally
     func getAuthenticationUser() throws -> AuthDataResultModel {
