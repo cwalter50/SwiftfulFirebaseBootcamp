@@ -12,7 +12,7 @@ final class SignInEmailViewModel: ObservableObject {
     @Published var email = ""
     @Published var password = ""
     
-    func signin() async throws{
+    func signup() async throws{
         guard !email.isEmpty, !password.isEmpty else {
             print("No email or password found")
             return
@@ -29,6 +29,15 @@ final class SignInEmailViewModel: ObservableObject {
 //                print("Error: \(error)")
 //            }
 //        }
+
+    }
+    func signin() async throws{
+        guard !email.isEmpty, !password.isEmpty else {
+            print("No email or password found")
+            return
+        }
+        let returnedUserData = try await AuthenticationManager.shared.signInUser(email: email, password: password)
+        print(returnedUserData)
 
     }
     
@@ -51,8 +60,16 @@ struct SignInEmailView: View {
             Button {
                 Task {
                     do {
+                        try await viewModel.signup()
+                        showSignInView = false
+                        return
+                    } catch {
+                        print("Error: \(error)")
+                    }
+                    do {
                         try await viewModel.signin()
                         showSignInView = false
+                        return
                     } catch {
                         print("Error: \(error)")
                     }
